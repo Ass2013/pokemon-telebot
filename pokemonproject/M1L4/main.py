@@ -1,7 +1,8 @@
 import telebot 
 from config import token
 from random import randint
-from logic import Pokemon, Wizard, Fighter
+from logic import Pokemon, Wizard, Fighter 
+
 
 bot = telebot.TeleBot(token)
 
@@ -34,6 +35,18 @@ def start(message):
         bot.reply_to(message, "You already have a Pokemon")
 
 
+
+@bot.message_handler(commands=['info'])
+async def info_pokemon(message):
+    username = message.from_user.username
+    if username in Pokemon.pokemons:
+        pok = Pokemon.pokemons[username]
+        await message.answer(pok.info())
+        await message.answer_photo(pok.img)
+    else:
+        await message.answer("This user does not have a Pokemon yet.")
+
+
 @bot.message_handler(commands=['attack'])
 def attack_pok(message):
     if message.reply_to_message:
@@ -47,7 +60,15 @@ def attack_pok(message):
     else:
             bot.send_message(message.chat.id, "To attack, you have to answer the message of the person you want to fight")
 
+@bot.message_handler(commands=['feed'])
+def feed_pok(message):
+    if message.from_user.username in Pokemon.pokemons.keys():
+            pok = Pokemon.pokemons[message.from_user.username]
+            res = pok.feed()
+            bot.send_message(message.chat.id, res)
+    else:
+            bot.send_message(message.chat.id, "You have create a Pokemon to feed it")
+
 
 bot.infinity_polling(none_stop=True)
-
-
+ 
